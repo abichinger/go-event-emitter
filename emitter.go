@@ -25,7 +25,7 @@ func NewEmitter(async bool) (em *Emitter) {
 }
 
 // EmitEvent emits the given event to all listeners and capturers
-func (em *Emitter) EmitEvent(event EventType, arguments ...interface{}) {
+func (em *Emitter) EmitEvent(event EventType, arguments []interface{}) {
 	// If we have no single listeners for this event, skip
 	em.mu.RLock()
 	if len(em.listenersOnce) > 0 {
@@ -62,20 +62,20 @@ func (em *Emitter) EmitEvent(event EventType, arguments ...interface{}) {
 func (em *Emitter) emitListenerEvents(listeners []*Listener, arguments []interface{}) {
 	for _, listener := range listeners {
 		if em.async {
-			go listener.handler(arguments...)
+			go listener.handler(arguments)
 			continue
 		}
-		listener.handler(arguments...)
+		listener.handler(arguments)
 	}
 }
 
 func (em *Emitter) emitCapturerEvents(capturers []*Capturer, event EventType, arguments []interface{}) {
 	for _, capturer := range capturers {
 		if em.async {
-			go capturer.handler(event, arguments...)
+			go capturer.handler(event, arguments)
 			continue
 		}
-		capturer.handler(event, arguments...)
+		capturer.handler(event, arguments)
 	}
 }
 

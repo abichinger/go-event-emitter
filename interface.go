@@ -4,7 +4,7 @@ package eventemitter
 type EventType string
 
 // HandleFunc is a handler function for a given event type
-type HandleFunc func(arguments ...interface{})
+type HandleFunc func(arguments []interface{})
 
 // Listener is a container struct used to remove the listener
 type Listener struct {
@@ -12,7 +12,7 @@ type Listener struct {
 }
 
 // CaptureFunc is a capturer function that can capture all emitted events
-type CaptureFunc func(event EventType, arguments ...interface{})
+type CaptureFunc func(event EventType, arguments []interface{})
 
 // Capturer is a container struct used to remove the capturer
 type Capturer struct {
@@ -36,5 +36,5 @@ type Observable interface {
 // EventEmitter is the interface which allows implementers to emit events
 type EventEmitter interface {
 	// EmitEvent emits the given event to all listeners and capturers
-	EmitEvent(event EventType, arguments ...interface{})
+	EmitEvent(event EventType, arguments []interface{})
 }

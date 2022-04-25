@@ -25,33 +25,33 @@ func testEmitter(t *testing.T, async bool) {
 
 	var ASingle, AListener, capture int32
 
-	listener := ob.AddListener("test event A", func(args ...interface{}) {
+	listener := ob.AddListener("test event A", func(args []interface{}) {
 		verifyArgs(t, args)
 		atomic.AddInt32(&AListener, 1)
 	})
 
-	ob.ListenOnce("test event A", func(args ...interface{}) {
+	ob.ListenOnce("test event A", func(args []interface{}) {
 		verifyArgs(t, args)
 		atomic.AddInt32(&ASingle, 1)
 	})
 
-	capturer := ob.AddCapturer(func(event EventType, args ...interface{}) {
+	capturer := ob.AddCapturer(func(event EventType, args []interface{}) {
 		verifyArgs(t, args)
 		atomic.AddInt32(&capture, 1)
 	})
 
-	em.EmitEvent("test event A", "test", 123, true)
-	em.EmitEvent("test event B", "test", 123, true)
-	em.EmitEvent("test event C", "test", 123, true)
-	em.EmitEvent("test event A", "test", 123, true)
-	em.EmitEvent("test event A", "test", 123, true)
+	em.EmitEvent("test event A", []interface{}{"test", 123, true})
+	em.EmitEvent("test event B", []interface{}{"test", 123, true})
+	em.EmitEvent("test event C", []interface{}{"test", 123, true})
+	em.EmitEvent("test event A", []interface{}{"test", 123, true})
+	em.EmitEvent("test event A", []interface{}{"test", 123, true})
 
 	ob.RemoveListener("test event A", listener)
 	ob.RemoveCapturer(capturer)
 
-	em.EmitEvent("Testing 123", 1)
-	em.EmitEvent("test event A", 1)
-	em.EmitEvent("Wow", 2)
+	em.EmitEvent("Testing 123", []interface{}{1})
+	em.EmitEvent("test event A", []interface{}{1})
+	em.EmitEvent("Wow", []interface{}{2})
 
 	if async {
 		// Events are async, so wait a bit for them to finish
@@ -102,14 +102,14 @@ func TestEmitNonAsyncRecursive(t *testing.T) {
 	e := NewEmitter(false)
 
 	var rootFired int
-	e.AddListener("rootevent", func(args ...interface{}) {
+	e.AddListener("rootevent", func(args []interface{}) {
 		rootFired++
-		e.EmitEvent("subevent", 1, 2, 3)
-		e.EmitEvent("subevent", 1, 2, 3)
+		e.EmitEvent("subevent", []interface{}{1, 2, 3})
+		e.EmitEvent("subevent", []interface{}{1, 2, 3})
 	})
 
 	var subFired int
-	e.AddListener("subevent", func(args ...interface{}) {
+	e.AddListener("subevent", func(args []interface{}) {
 		if len(args) != 3 {
 			t.Logf("Too few arguments (%d) %#v", len(args), args)
 			t.Fail()
@@ -118,7 +118,7 @@ func TestEmitNonAsyncRecursive(t *testing.T) {
 		subFired++
 	})
 
-	e.EmitEvent("rootevent", "test")
+	e.EmitEvent("rootevent", []interface{}{"test"})
 
 	if rootFired != 1 {
 		t.Log("Root event all not triggered right", rootFired)
@@ -139,16 +139,16 @@ func TestMultipleRoutineEmitListen(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		go func() {
-			e.EmitEvent(EventType("blurp"), 1, 2, 3)
-			e.EmitEvent(EventType("worst"), 321)
+			e.EmitEvent(EventType("blurp"), []interface{}{1, 2, 3})
+			e.EmitEvent(EventType("worst"), []interface{}{321})
 			wg.Done()
 		}()
 	}
 
 	for i := 0; i < 10; i++ {
 		go func() {
-			e.AddListener(EventType("blurp"), func(arguments ...interface{}) {})
-			e.AddCapturer(func(event EventType, arguments ...interface{}) {})
+			e.AddListener(EventType("blurp"), func(arguments []interface{}) {})
+			e.AddCapturer(func(event EventType, arguments []interface{}) {})
 			wg.Done()
 		}()
 	}
